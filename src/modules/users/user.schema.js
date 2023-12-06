@@ -15,8 +15,37 @@ const registerSchema = z.object({
     .max(16, { message: 'Password is too long' }),
 });
 
+const loginSchema = z.object({
+  accountNumber: z
+    .string({
+      invalid_type_error: 'Account Number must be a string',
+      required_error: 'Account Number is required',
+    })
+    .min(6, { message: 'Account Number must has 6 digits' })
+    .max(6, { message: 'Account Number must has 6 digits' }),
+  password: z.string({
+    invalid_type_error: 'Password must be a string',
+    required_error: 'Password is required',
+  }),
+});
+
 export const validateUser = (data) => {
   const result = registerSchema.safeParse(data);
+  const {
+    hasError,
+    errorMessage,
+    data: userData,
+  } = extractValidationData(result);
+
+  return {
+    hasError,
+    errorMessage,
+    userData,
+  };
+};
+
+export const validateLogin = (data) => {
+  const result = loginSchema.safeParse(data);
   const {
     hasError,
     errorMessage,

@@ -1,6 +1,6 @@
 import { AppError } from '../../common/errors/appError.js';
 import { catchAsync } from '../../common/errors/catchAsync.js';
-import { validateUser } from './user.schema.js';
+import { validateLogin, validateUser } from './user.schema.js';
 import { UserService } from './user.service.js';
 
 export const signup = catchAsync(async (req, res, next) => {
@@ -19,8 +19,17 @@ export const signup = catchAsync(async (req, res, next) => {
 });
 
 export const login = catchAsync(async (req, res, next) => {
-  const { accountNumber, password } = req.body;
-  const user = await UserService.login({ accountNumber, password });
+  //const { accountNumber, password } = req.body;
+  const { hasError, errorMessage, userData } = validateLogin(req.body);
+
+  if (hasError) {
+    return res.status(422).json({
+      status: 'error',
+      message: errorMessage,
+    });
+  }
+
+  const user = await UserService.login({ ...userData });
 
   if (!user) {
     return next(new AppError(`Account Number or password not valid!.`, 404));
